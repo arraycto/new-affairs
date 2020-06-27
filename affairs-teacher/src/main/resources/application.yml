@@ -1,4 +1,10 @@
 spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev
+
   application:
     name: teacher
 
@@ -76,3 +82,7 @@ server:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+---
+spring:
+  profiles: pro

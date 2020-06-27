@@ -1,4 +1,10 @@
 spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev
+
   application:
     name: gateway
 
@@ -24,3 +30,7 @@ spring:
 
 server:
   port: 88
+
+---
+spring:
+  profiles: pro
