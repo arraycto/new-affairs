@@ -1,5 +1,6 @@
 package com.affairs.student.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public class Student implements Serializable {
     /**
      * 学号
      */
+    @TableId("stu_id")
     private Integer stuId;
 
     /**

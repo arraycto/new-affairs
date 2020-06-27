@@ -4,5 +4,11 @@ spring:
     password: password
     url: jdbc:mysql://192.168.56.20:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.226.1:8848
+  application:
+    name: course
 server:
   port: 9000

@@ -1,2 +1,23 @@
 server:
   port: 88
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: student
+          uri: lb://student
+          predicates:
+            - Path=/api/student/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), /$\{segment}
+        - id: teacher
+          uri: lb://teacher
+          predicates:
+            - Path=/api/teacher/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), /$\{segment}
+    nacos:
+      discovery:
+        server-addr: 192.168.226.1:8848
+  application:
+    name: gateway
