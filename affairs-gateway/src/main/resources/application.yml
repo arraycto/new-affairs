@@ -28,6 +28,13 @@ spring:
           filters:
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
 
+        - id: course
+          uri: lb://course
+          predicates:
+            - Path=/api/course/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), /$\{segment}
+
 server:
   port: 88
 

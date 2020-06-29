@@ -1,22 +1,17 @@
-package com.affairs.course.entity;
+package com.affaris.common.to;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
- * 课程信息
- * </p>
+ * Course远程调用传输类
  *
  * @author Vulgarities
- * @since 2020-06-28
  */
-@TableName("cou_course")
-public class Course implements Serializable {
+public class CourseTo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
