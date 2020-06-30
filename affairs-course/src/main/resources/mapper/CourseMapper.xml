@@ -2,4 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.affairs.course.mapper.CourseMapper">
 
+    <select id="selectPageVo" resultType="com.affairs.course.entity.Course">
+        SELECT * FROM cou_course WHERE cou_builder=#{couBuilder}
+    </select>
+    <select id="selectCoursePageByTimeAndCount" resultType="com.affairs.course.entity.Course">
+        SELECT * FROM cou_course WHERE cou_time &lt;= #{now} AND cou_count > 0
+    </select>
 </mapper>

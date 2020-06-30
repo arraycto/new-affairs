@@ -2,13 +2,19 @@ package com.affairs.student.controller;
 
 
 import com.affairs.student.entity.Student;
+import com.affairs.student.feign.ICourseFeignService;
 import com.affairs.student.service.IStudentService;
+import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -23,6 +29,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class StudentController {
     @Autowired
     private IStudentService studentService;
+
+    @Autowired
+    private ICourseFeignService courseFeignService;
 
     /**
      * 保存学生信息
@@ -52,7 +61,7 @@ public class StudentController {
      * @return
      */
     @RequestMapping("/login")
-    public R login(@RequestBody Student student) {
+    public R login(@RequestBody Student student, Model model, HttpSession session) {
         if (student == null) {
             return R.failed("提交的内容经解析后为null");
         }
@@ -61,11 +70,31 @@ public class StudentController {
         Student studentServiceOne = studentService.getOne(new QueryWrapper<Student>().select(stuId, stuPassword).eq(stuId, student.getStuId()));
         if (studentServiceOne != null) {
             if (student.getStuPassword().equals(studentServiceOne.getStuPassword())) {
+                // 保存到session中
+                session.setAttribute("student", student);
                 return R.success();
             } else {
                 return R.failed("密码有误");
             }
         }
         return R.failed("查无此人");
+    }
+
+    /**
+     * 保存选课信息
+     *
+     * @param electiveTo
+     * @param session
+     * @return
+     */
+    @RequestMapping("/saveElective")
+    public R saveElective(@RequestBody ElectiveTo electiveTo, HttpSession session) {
+        Student student = (Student) session.getAttribute("student");
+        if (student == null) {
+            return R.failed("你的登录会话已过期，请前往首页登录");
+        }
+        electiveTo.setStuId(student.getStuId());
+        electiveTo.setElectiveTime(LocalDateTime.now());
+        return courseFeignService.save(electiveTo);
     }
 }

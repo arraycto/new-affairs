@@ -11,10 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -26,7 +23,6 @@ import javax.servlet.http.HttpSession;
  * @author Vulgarities
  * @since 2020-06-25
  */
-@SessionAttributes("teacher")
 @RestController
 @RequestMapping("/teacher/teacher")
 public class TeacherController {
@@ -75,7 +71,6 @@ public class TeacherController {
         if (teacherServiceOne != null) {
             if (teacher.getTeaPassword().equals(teacherServiceOne.getTeaPassword())) {
                 // 存入session
-//                model.addAttribute("teacher", teacher);
                 session.setAttribute("teacher", teacher);
                 return R.success();
             } else {
@@ -95,15 +90,29 @@ public class TeacherController {
     @RequestMapping("/addCourse")
     public R addCourse(@RequestBody CourseTo courseTo, HttpSession session) {
         Teacher teacher = (Teacher) session.getAttribute("teacher");
+        if (teacher == null) {
+            return R.failed("你的登录会话已过期，请前往首页重新登录");
+        }
         courseTo.setCouBuilder(String.valueOf(teacher.getTeaId()));
         courseFeignService.add(courseTo);
         return R.success();
     }
 
+    /**
+     * 查询教师所开设的课程
+     *
+     * @param session
+     * @return
+     */
     @RequestMapping("/list/teaId")
-    public R listOfTeaId(HttpSession session) {
+    public R listOfTeaId(@RequestParam("current") Long current, HttpSession session) {
         Teacher teacher = (Teacher) session.getAttribute("teacher");
+        if (teacher == null) {
+            return R.failed("你的登录会话已过期，请前往首页重新登录");
+        }
         TeacherTo teacherTo = new TeacherTo();
+        teacherTo.setCurrent(current);
+        teacherTo.setSize(12);
         BeanUtils.copyProperties(teacher, teacherTo);
         return courseFeignService.listByTeaId(teacherTo);
     }

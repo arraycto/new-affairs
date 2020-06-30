@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 /**
- * 教师信息远程传输类
+ * Teacher远程调用传输类
  *
  * @author Vulgarities
  */
@@ -32,6 +32,13 @@ public class TeacherTo implements Serializable {
      * 教师登录密码
      */
     private String teaPassword;
+
+    private long current;
+
+    private long size;
+
+    public TeacherTo() {
+    }
 
     public Integer getTeaId() {
         return teaId;
@@ -63,6 +70,22 @@ public class TeacherTo implements Serializable {
 
     public void setTeaPassword(String teaPassword) {
         this.teaPassword = teaPassword;
+    }
+
+    public long getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(long current) {
+        this.current = current;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 
     @Override

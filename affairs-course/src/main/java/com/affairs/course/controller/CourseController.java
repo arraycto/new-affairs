@@ -6,12 +6,15 @@ import com.affairs.course.service.ICourseService;
 import com.affaris.common.to.TeacherTo;
 import com.affaris.common.utils.R;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -43,12 +46,72 @@ public class CourseController {
         return R.success();
     }
 
+    /**
+     * 分页查询指定教师开设的课程
+     *
+     * @param teacherTo
+     * @return
+     */
     @RequestMapping("/list/teaId")
     public R listByTeaId(@RequestBody TeacherTo teacherTo) {
+        if (teacherTo == null) {
+            return R.failed("请求出错");
+        }
+        IPage<Course> courseIPage = courseService.selectCoursePage(new Page<Course>(teacherTo.getCurrent(), teacherTo.getSize())
+                , teacherTo.getTeaId());
+        return R.success().put("courseIPage", courseIPage);
+    }
+
+    /**
+     * 根据couId删除课程
+     *
+     * @param course
+     * @return
+     */
+    @RequestMapping("/del/couId")
+    public R delByCouId(@RequestBody Course course) {
         // 构造条件
         QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
-        courseQueryWrapper.eq("cou_builder", teacherTo.getTeaId());
-        List<Course> courseList = courseService.list(courseQueryWrapper);
-        return R.success().put("courseList", courseList);
+        courseQueryWrapper.eq("cou_id", course.getCouId());
+        if (courseService.remove(courseQueryWrapper)) {
+            return R.success();
+        }
+        return R.failed("删除失败");
     }
+
+    /**
+     * 编辑课程
+     *
+     * @param course
+     * @return
+     */
+    @RequestMapping("/edit")
+    public R editCourse(@RequestBody Course course) {
+        // 构造条件
+        QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
+        courseQueryWrapper.eq("cou_id", course.getCouId());
+        // 更新数据
+        if (courseService.update(course, courseQueryWrapper)) {
+            return R.success();
+        }
+        return R.failed("修改失败");
+    }
+
+    /**
+     * 分页查询可选的课程
+     * 满足两个条件：
+     * 1. 选课开始
+     * 2. 人数未满
+     *
+     * @param current 当前页码
+     * @return
+     */
+    @RequestMapping("/list/time")
+    public R listByTime(@RequestParam("current") Long current) {
+        // 指定分页大小
+        long size = 12;
+        IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now());
+        return R.success().put("courseIPage", courseIPage);
+    }
+
 }
