@@ -6,7 +6,7 @@ spring:
   profiles: dev
 
   application:
-    name: gateway
+    name: affairs-gateway
 
   cloud:
     nacos:

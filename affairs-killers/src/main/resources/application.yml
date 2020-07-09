@@ -6,7 +6,7 @@ spring:
   profiles: dev
 
   application:
-    name: affairs-student
+    name: affairs-killers
 
   cloud:
     nacos:
@@ -16,7 +16,7 @@ spring:
   datasource:
     username: root
     password: password
-    url: jdbc:mysql://192.168.56.20:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8
+    url: jdbc:mysql://192.168.56.20:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
@@ -28,7 +28,7 @@ spring:
       filters: stat
 
       # 初始化时建立物理连接的个数
-      initialSize: 1
+      initialSize: 20
       # 最大连接池数量
       maxActive: 20
       # 获取连接时最大等待时间，单位毫秒。
@@ -77,13 +77,16 @@ spring:
         login-username: admin
         login-password: admin
 
+  redis:
+    host: 192.168.56.20
+
+  rabbitmq:
+    host: 192.168.56.20
+    port: 5672
+    virtual-host: /
+
 server:
-  port: 7000
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
+  port: 25000
 ---
 spring:
   profiles: pro

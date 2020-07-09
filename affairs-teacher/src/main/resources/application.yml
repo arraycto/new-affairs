@@ -6,7 +6,7 @@ spring:
   profiles: dev
 
   application:
-    name: teacher
+    name: affairs-teacher
 
   cloud:
     nacos:
@@ -19,6 +19,7 @@ spring:
     url: jdbc:mysql://192.168.56.20:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
+
     druid:
       # 属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有：
       # 监控统计用的filter:stat

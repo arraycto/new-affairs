@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -110,8 +111,26 @@ public class CourseController {
     public R listByTime(@RequestParam("current") Long current) {
         // 指定分页大小
         long size = 12;
-        IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now());
+        IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now(), current);
         return R.success().put("courseIPage", courseIPage);
+    }
+
+    /**
+     * 查询所有可选课程
+     *
+     * @return
+     */
+    @RequestMapping("/list")
+    public R list() {
+        QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
+        // 获取到的是未来一天将开始的课程和已开始的课程
+        LocalDateTime localDateTime = LocalDateTime.now().plusDays(1);
+        courseQueryWrapper.le("cou_time", localDateTime).gt("cou_count", 0);
+        List<Course> list = courseService.list(courseQueryWrapper);
+        if (list != null) {
+            return R.success().put("allCourse", list);
+        }
+        return R.failed();
     }
 
 }

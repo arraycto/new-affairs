@@ -21,4 +21,13 @@ public interface ICourseFeignService {
      */
     @RequestMapping("/course/elective/save")
     public R save(@RequestBody ElectiveTo electiveTo);
+
+    /**
+     * 查询学生已选课程
+     *
+     * @param electiveTo
+     * @return
+     */
+    @RequestMapping("/course/elective/isJoin")
+    public R isJoin(@RequestBody ElectiveTo electiveTo);
 }

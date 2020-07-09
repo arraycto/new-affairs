@@ -1,17 +1,17 @@
-package com.affairs.course;
+package com.affairs.killers;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
+@EnableFeignClients
 @EnableDiscoveryClient
-@MapperScan("com.affairs.course.mapper")
 @SpringBootApplication
-public class AffairsCourseApplication {
+public class AffairsKillersApplication {
 
     @PostConstruct
     void started() {
@@ -19,7 +19,7 @@ public class AffairsCourseApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(AffairsCourseApplication.class, args);
+        SpringApplication.run(AffairsKillersApplication.class, args);
     }
 
 }

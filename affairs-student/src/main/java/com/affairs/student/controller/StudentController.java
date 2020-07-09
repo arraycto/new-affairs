@@ -97,4 +97,20 @@ public class StudentController {
         electiveTo.setElectiveTime(LocalDateTime.now());
         return courseFeignService.save(electiveTo);
     }
+
+    /**
+     * 查询是否已选该课程
+     *
+     * @return
+     */
+    @RequestMapping("/isJoin")
+    public R isJoin(HttpSession session) {
+        Student student = (Student) session.getAttribute("student");
+        if (student == null) {
+            return R.failed("你的登录会话已过期，请前往首页登录");
+        }
+        ElectiveTo electiveTo = new ElectiveTo();
+        electiveTo.setStuId(student.getStuId());
+        return courseFeignService.isJoin(electiveTo);
+    }
 }

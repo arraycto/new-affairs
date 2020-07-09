@@ -1,30 +1,14 @@
-package com.affairs.course.entity;
+package com.affairs.killers.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
- * 课程信息
- * </p>
- *
  * @author Vulgarities
- * @since 2020-06-28
  */
-@TableName("cou_course")
-public class Course implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class CourseVo {
     /**
      * 课程编号
      */
-    @TableId(value = "cou_id", type = IdType.AUTO)
     private Integer couId;
 
     /**
@@ -50,8 +34,19 @@ public class Course implements Serializable {
     /**
      * 随机码
      */
-    @TableField(exist = false)
     private String randomCode;
+
+    @Override
+    public String toString() {
+        return "CourseVo{" +
+                "couId=" + couId +
+                ", couName='" + couName + '\'' +
+                ", couBuilder='" + couBuilder + '\'' +
+                ", couCount=" + couCount +
+                ", couTime=" + couTime +
+                ", randomCode='" + randomCode + '\'' +
+                '}';
+    }
 
     public Integer getCouId() {
         return couId;
@@ -93,14 +88,11 @@ public class Course implements Serializable {
         this.couTime = couTime;
     }
 
-    @Override
-    public String toString() {
-        return "Course{" +
-                "couId=" + couId +
-                ", couName=" + couName +
-                ", couBuilder=" + couBuilder +
-                ", couCount=" + couCount +
-                ", couTime=" + couTime +
-                "}";
+    public String getRandomCode() {
+        return randomCode;
+    }
+
+    public void setRandomCode(String randomCode) {
+        this.randomCode = randomCode;
     }
 }

@@ -30,7 +30,8 @@ public interface ICourseService extends IService<Course> {
      *
      * @param coursePage
      * @param now
+     * @param current
      * @return
      */
-    IPage<Course> selectCoursePageByTimeAndCount(Page<Course> coursePage, LocalDateTime now);
+    IPage<Course> selectCoursePageByTimeAndCount(Page<Course> coursePage, LocalDateTime now, Long current);
 }
