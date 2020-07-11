@@ -6,9 +6,10 @@ import com.affairs.student.feign.ICourseFeignService;
 import com.affairs.student.service.IStudentService;
 import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
+import com.affaris.common.vo.StudentVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,7 +62,7 @@ public class StudentController {
      * @return
      */
     @RequestMapping("/login")
-    public R login(@RequestBody Student student, Model model, HttpSession session) {
+    public R login(@RequestBody Student student, HttpSession session) {
         if (student == null) {
             return R.failed("提交的内容经解析后为null");
         }
@@ -71,7 +72,9 @@ public class StudentController {
         if (studentServiceOne != null) {
             if (student.getStuPassword().equals(studentServiceOne.getStuPassword())) {
                 // 保存到session中
-                session.setAttribute("student", student);
+                StudentVo studentVo = new StudentVo();
+                BeanUtils.copyProperties(student, studentVo);
+                session.setAttribute("studentVo", studentVo);
                 return R.success();
             } else {
                 return R.failed("密码有误");
@@ -89,11 +92,11 @@ public class StudentController {
      */
     @RequestMapping("/saveElective")
     public R saveElective(@RequestBody ElectiveTo electiveTo, HttpSession session) {
-        Student student = (Student) session.getAttribute("student");
-        if (student == null) {
+        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        if (studentVo == null) {
             return R.failed("你的登录会话已过期，请前往首页登录");
         }
-        electiveTo.setStuId(student.getStuId());
+        electiveTo.setStuId(studentVo.getStuId());
         electiveTo.setElectiveTime(LocalDateTime.now());
         return courseFeignService.save(electiveTo);
     }
@@ -105,12 +108,12 @@ public class StudentController {
      */
     @RequestMapping("/isJoin")
     public R isJoin(HttpSession session) {
-        Student student = (Student) session.getAttribute("student");
-        if (student == null) {
+        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        if (studentVo == null) {
             return R.failed("你的登录会话已过期，请前往首页登录");
         }
         ElectiveTo electiveTo = new ElectiveTo();
-        electiveTo.setStuId(student.getStuId());
+        electiveTo.setStuId(studentVo.getStuId());
         return courseFeignService.isJoin(electiveTo);
     }
 }

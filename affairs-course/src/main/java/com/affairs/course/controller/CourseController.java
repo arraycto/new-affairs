@@ -5,6 +5,7 @@ import com.affairs.course.entity.Course;
 import com.affairs.course.service.ICourseService;
 import com.affaris.common.to.TeacherTo;
 import com.affaris.common.utils.R;
+import com.affaris.common.vo.CourseVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -113,6 +114,20 @@ public class CourseController {
         long size = 12;
         IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now(), current);
         return R.success().put("courseIPage", courseIPage);
+    }
+
+    /**
+     * 从缓存中获取当前可选的课程
+     *
+     * @param current
+     * @return
+     */
+    @RequestMapping("/list/kill")
+    public R listWithKill(@RequestParam("current") Long current) {
+        // 指定分页大小
+        long size = 12;
+        Page<CourseVo> courseIPage = courseService.getListWithKill(current, size, LocalDateTime.now());
+        return R.success().put("courseVoList", courseIPage);
     }
 
     /**

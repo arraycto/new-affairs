@@ -1,4 +1,4 @@
-package com.affairs.killers.vo;
+package com.affaris.common.vo;
 
 import java.time.LocalDateTime;
 

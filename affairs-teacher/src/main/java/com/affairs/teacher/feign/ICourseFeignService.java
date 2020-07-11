@@ -12,8 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * @author Vulgarities
  */
-@FeignClient("course")
+@FeignClient("affairs-course")
 public interface ICourseFeignService {
+    /**
+     * 新建课程
+     *
+     * @param courseTo
+     * @return
+     */
     @RequestMapping("/course/course/add")
     public R add(@RequestBody CourseTo courseTo);
 

@@ -31,16 +31,16 @@ public class ElectiveController {
     @Autowired
     private ICourseService courseService;
 
-    /**
-     * 保存选课信息
-     *
-     * @param electiveTo
-     * @return
-     */
-    @RequestMapping("/save")
-    public R save(@RequestBody ElectiveTo electiveTo) {
-        return electiveService.saveElective(electiveTo);
-    }
+//    /**
+//     * 保存选课信息
+//     *
+//     * @param electiveTo
+//     * @return
+//     */
+//    @RequestMapping("/save")
+//    public R save(@RequestBody ElectiveTo electiveTo) {
+//        return electiveService.saveElective(electiveTo);
+//    }
 
     /**
      * 查询学生已选课程

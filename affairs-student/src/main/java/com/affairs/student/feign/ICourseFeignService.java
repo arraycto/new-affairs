@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * @author Vulgarities
  */
-@FeignClient("course")
+@FeignClient("affairs-course")
 public interface ICourseFeignService {
     /**
      * 保存选课信息

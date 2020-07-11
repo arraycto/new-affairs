@@ -15,7 +15,7 @@ public class CourseScheduled {
     @Autowired
     IKillersService killersService;
 
-    @Scheduled(cron = "0 0 20 * * ?")
+    @Scheduled(cron = "0 14 3 * * ?")
     public void getCourse() {
         killersService.getCourse();
     }

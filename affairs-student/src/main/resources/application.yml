@@ -77,6 +77,12 @@ spring:
         login-username: admin
         login-password: admin
 
+  redis:
+    host: 192.168.56.20
+
+  session:
+    store-type: redis
+
 server:
   port: 7000
 

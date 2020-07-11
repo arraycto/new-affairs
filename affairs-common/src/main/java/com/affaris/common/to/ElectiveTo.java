@@ -1,8 +1,5 @@
 package com.affaris.common.to;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-
 import java.time.LocalDateTime;
 
 /**
@@ -14,7 +11,6 @@ public class ElectiveTo {
     /**
      * 选课编号
      */
-    @TableId(value = "elective_id", type = IdType.AUTO)
     private Integer electiveId;
 
     /**
@@ -36,6 +32,10 @@ public class ElectiveTo {
      * 选课时间
      */
     private LocalDateTime electiveTime;
+    /**
+     * 随机码
+     */
+    private String randomCode;
 
     public Integer getElectiveId() {
         return electiveId;
@@ -77,14 +77,23 @@ public class ElectiveTo {
         this.electiveTime = electiveTime;
     }
 
+    public String getRandomCode() {
+        return randomCode;
+    }
+
+    public void setRandomCode(String randomCode) {
+        this.randomCode = randomCode;
+    }
+
     @Override
     public String toString() {
-        return "Elective{" +
+        return "ElectiveTo{" +
                 "electiveId=" + electiveId +
                 ", couId=" + couId +
                 ", stuId=" + stuId +
                 ", teaId=" + teaId +
                 ", electiveTime=" + electiveTime +
-                "}";
+                ", randomCode='" + randomCode + '\'' +
+                '}';
     }
 }

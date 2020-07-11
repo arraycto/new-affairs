@@ -2,7 +2,8 @@ package com.affairs.killers.service.impl;
 
 import com.affairs.killers.feign.ICourseFeignService;
 import com.affairs.killers.service.IKillersService;
-import com.affairs.killers.vo.CourseVo;
+import com.affaris.common.to.ElectiveTo;
+import com.affaris.common.vo.CourseVo;
 import com.affaris.common.utils.R;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -10,12 +11,15 @@ import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +36,63 @@ public class KillersServiceImpl implements IKillersService {
     @Autowired
     ICourseFeignService courseFeignService;
 
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+
     Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public boolean kill(Integer stuId, Integer couId, Integer teaId, String randomCode) {
+        logger.info("start:" + System.getProperty("user.timezone"));
+        // 合法性校验
+        BoundHashOperations<String, String, String> hashOperations = stringRedisTemplate.boundHashOps("killers:info");
+        String courseVoStr = hashOperations.get(String.valueOf(couId));
+        logger.info("开始抢课");
+        logger.info("courseVoStr" + courseVoStr);
+        if (!StringUtils.isEmpty(courseVoStr)) {
+            CourseVo courseVo = JSON.parseObject(courseVoStr, CourseVo.class);
+            logger.info("从redis中获取到的CourseVo:" + courseVo);
+            if (courseVo != null) {
+                // 多重校验在合法时间内
+                LocalDateTime couTime = courseVo.getCouTime();
+                if (LocalDateTime.now().isAfter(couTime)) {
+                    logger.info("时间校验通过！");
+                    String randomCodeFromCourseVo = courseVo.getRandomCode();
+                    // 随机码校验
+                    if (randomCodeFromCourseVo.equals(randomCode)) {
+                        logger.info("随机码通过！");
+                        // 校验幂等性（每门课程每人只能选一次）
+                        // 抢课成功后在redis中做标记
+                        String redisKey = stuId + "_" + couId;
+                        // 如果不存在就占个坑
+                        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(redisKey, String.valueOf(teaId), 1, TimeUnit.DAYS);
+                        if (flag != null && flag) {
+                            logger.info("占坑成功！");
+                            // 占位成功说明没选过，减信号量
+                            RSemaphore semaphore = redissonClient.getSemaphore("killers:token:" + randomCodeFromCourseVo);
+                            // 减一个
+                            boolean tryAcquire = semaphore.tryAcquire(1);
+                            if (tryAcquire) {
+                                // 秒杀成功交给课程服务处理
+                                ElectiveTo electiveTo = new ElectiveTo();
+                                electiveTo.setStuId(stuId);
+                                electiveTo.setCouId(couId);
+                                electiveTo.setTeaId(teaId);
+                                electiveTo.setElectiveTime(LocalDateTime.now());
+                                logger.warn(LocalDateTime.now().toString());
+                                // 发送消息
+                                String jsonString = JSON.toJSONString(electiveTo);
+                                rabbitTemplate.convertAndSend("course-event-exchange", "course", jsonString);
+                                logger.info("消息发送成功，内容是" + jsonString);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
     public void getCourse() {

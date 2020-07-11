@@ -15,23 +15,31 @@ spring:
 
     gateway:
       routes:
-        - id: student
-          uri: lb://student
+        - id: affairs-student
+          uri: lb://affairs-student
           predicates:
             - Path=/api/student/**
           filters:
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
-        - id: teacher
-          uri: lb://teacher
+
+        - id: affairs-teacher
+          uri: lb://affairs-teacher
           predicates:
             - Path=/api/teacher/**
           filters:
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
 
-        - id: course
-          uri: lb://course
+        - id: affairs-course
+          uri: lb://affairs-course
           predicates:
             - Path=/api/course/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), /$\{segment}
+
+        - id: affairs-killers
+          uri: lb://affairs-killers
+          predicates:
+            - Path=/api/killers/**
           filters:
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
 

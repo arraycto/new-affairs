@@ -1,6 +1,7 @@
 package com.affairs.course.service;
 
 import com.affairs.course.entity.Course;
+import com.affaris.common.vo.CourseVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -34,4 +35,14 @@ public interface ICourseService extends IService<Course> {
      * @return
      */
     IPage<Course> selectCoursePageByTimeAndCount(Page<Course> coursePage, LocalDateTime now, Long current);
+
+    /**
+     * 从缓存中获取当前可抢的课程（带有随机码）
+     *
+     * @param current
+     * @param size
+     * @param now
+     * @return
+     */
+    Page<CourseVo> getListWithKill(Long current, long size, LocalDateTime now);
 }
