@@ -3,8 +3,8 @@ package com.affairs.killers.service.impl;
 import com.affairs.killers.feign.ICourseFeignService;
 import com.affairs.killers.service.IKillersService;
 import com.affaris.common.to.ElectiveTo;
-import com.affaris.common.vo.CourseVo;
 import com.affaris.common.utils.R;
+import com.affaris.common.vo.CourseVo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import org.redisson.api.RSemaphore;
@@ -13,13 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.BoundHashOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -73,13 +73,17 @@ public class KillersServiceImpl implements IKillersService {
                             // 减一个
                             boolean tryAcquire = semaphore.tryAcquire(1);
                             if (tryAcquire) {
-                                // 秒杀成功交给课程服务处理
+                                // redis中相应课程的最大可选人数减1，方便页面展示
+                                updateCourseVosWithRedis(couId);
+                                // 在redis中做一份选课表缓存
+                                saveELectiveWithRedis(stuId, couId);
+
+                                // 抢课成功交给课程服务处理
                                 ElectiveTo electiveTo = new ElectiveTo();
                                 electiveTo.setStuId(stuId);
                                 electiveTo.setCouId(couId);
                                 electiveTo.setTeaId(teaId);
                                 electiveTo.setElectiveTime(LocalDateTime.now());
-                                logger.warn(LocalDateTime.now().toString());
                                 // 发送消息
                                 String jsonString = JSON.toJSONString(electiveTo);
                                 rabbitTemplate.convertAndSend("course-event-exchange", "course", jsonString);
@@ -92,6 +96,49 @@ public class KillersServiceImpl implements IKillersService {
             }
         }
         return false;
+    }
+
+    /**
+     * 在redis中做一份选课表的缓存
+     *
+     * @param stuId
+     * @param couId
+     */
+    private void saveELectiveWithRedis(Integer stuId, Integer couId) {
+        // 在redis中存一份已选课程表，key为当前学生id，值为已选课程id
+        ListOperations<String, String> opsForList = stringRedisTemplate.opsForList();
+        opsForList.leftPush("killers:elective:" + stuId, String.valueOf(couId));
+        // 选课信息保存7天
+        opsForList.getOperations().expire("killers:elective:" + stuId, 7, TimeUnit.DAYS);
+    }
+
+    /**
+     * 对redis中相应课程的最大可选人数进行更新
+     *
+     * @param couId
+     */
+    private void updateCourseVosWithRedis(Integer couId) {
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        // 获取redis中已上架的课程信息
+        String str = ops.get("killers:courseVos");
+        List<CourseVo> courseVoListTmp = JSON.parseObject(str, new TypeReference<List<CourseVo>>() {
+        });
+        if (courseVoListTmp != null) {
+            // redis中相应课程的最大可选人数减1，方便页面展示
+            for (CourseVo vo : courseVoListTmp) {
+                if (couId.equals(vo.getCouId())) {
+                    vo.setCouCount(vo.getCouCount() - 1);
+                    break;
+                }
+            }
+            // 更新redis中的killers:courseVos
+            String jsonString = JSON.toJSONString(courseVoListTmp);
+            LocalDateTime timeTmp = LocalDateTime.now().plusDays(1).withHour(3).withMinute(0).withSecond(0);
+            logger.info(timeTmp.toString());
+            long endTime = timeTmp.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+            // 更新保存到redis中并设置过期时间(此刻到第二天三点钟再次更新的毫秒值)
+            ops.set("killers:courseVos", jsonString, endTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override

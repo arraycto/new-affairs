@@ -112,8 +112,6 @@ public class StudentController {
         if (studentVo == null) {
             return R.failed("你的登录会话已过期，请前往首页登录");
         }
-        ElectiveTo electiveTo = new ElectiveTo();
-        electiveTo.setStuId(studentVo.getStuId());
-        return courseFeignService.isJoin(electiveTo);
+        return courseFeignService.isJoin(studentVo.getStuId());
     }
 }

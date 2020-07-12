@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -45,4 +46,12 @@ public interface ICourseService extends IService<Course> {
      * @return
      */
     Page<CourseVo> getListWithKill(Long current, long size, LocalDateTime now);
+
+    /**
+     * 查询学生已选课程
+     *
+     * @param stuId
+     * @return
+     */
+    List<String> joinCourseList(Integer stuId);
 }

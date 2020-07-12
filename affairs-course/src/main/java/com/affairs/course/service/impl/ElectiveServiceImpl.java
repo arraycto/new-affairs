@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * <p>
@@ -39,14 +41,25 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
 
     @RabbitListener(queues = {"course-release-queue"})
     @Transactional(rollbackFor = Exception.class)
-    public void receiveMessageToSaveElective(Message message, String jsonString, Channel channel) {
+    public void receiveMessageToSaveElective(Message message, String jsonString, Channel channel) throws ExecutionException, InterruptedException, IOException {
+        // 异步编排
         logger.info("消息接收成功：内容是" + jsonString);
         logger.info("message:" + message);
         ElectiveTo electiveTo = JSON.parseObject(jsonString, ElectiveTo.class);
-        Elective elective = new Elective();
-        BeanUtils.copyProperties(electiveTo, elective);
-        if (baseMapper.insert(elective) > 0) {
-            // 插入成功课程最大人数发生变化
+        long deliveryTag = message.getMessageProperties().getDeliveryTag();
+        // 提取数据
+        CompletableFuture<Boolean> future1 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("Thread.currentThread().getName() = " + Thread.currentThread().getName());
+            // 更新选课表
+            Elective elective = new Elective();
+            BeanUtils.copyProperties(electiveTo, elective);
+            int flag = baseMapper.insert(elective);
+            return flag > 0;
+        });
+
+        CompletableFuture<Boolean> future2 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("Thread.currentThread().getName() = " + Thread.currentThread().getName());
+            // 更新课程表
             QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
             Integer couId = electiveTo.getCouId();
             courseQueryWrapper.select("cou_count").eq("cou_id", couId);
@@ -55,22 +68,13 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
             // 构造条件更新课程最大人数
             UpdateWrapper<Course> courseUpdateWrapper = new UpdateWrapper<>();
             courseUpdateWrapper.set("cou_count", couCount).eq("cou_id", couId);
-            long deliveryTag = message.getMessageProperties().getDeliveryTag();
-            if (courseService.update(courseUpdateWrapper)) {
-                try {
-                    channel.basicAck(deliveryTag, false);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                logger.info("确认抢课成功！");
-            } else {
-                // 不确认消息
-                try {
-                    channel.basicNack(deliveryTag, false, true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            return courseService.update(courseUpdateWrapper);
+        });
+
+        if (future1.get() && future2.get()) {
+            channel.basicAck(deliveryTag, false);
+        } else {
+            channel.basicNack(deliveryTag, false, true);
         }
     }
 }

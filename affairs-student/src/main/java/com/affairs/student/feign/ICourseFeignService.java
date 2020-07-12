@@ -25,9 +25,9 @@ public interface ICourseFeignService {
     /**
      * 查询学生已选课程
      *
-     * @param electiveTo
+     * @param stuId
      * @return
      */
     @RequestMapping("/course/elective/isJoin")
-    public R isJoin(@RequestBody ElectiveTo electiveTo);
+    public R isJoin(@RequestBody Integer stuId);
 }

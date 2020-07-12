@@ -9,6 +9,8 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -33,9 +35,17 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Override
     public IPage<Course> selectCoursePage(Page<Course> page, Integer teaId) {
         return baseMapper.selectPageVo(page, teaId);
+    }
+
+    @Override
+    public List<String> joinCourseList(Integer stuId) {
+        // 获取redis中选课表的全部内容
+        return stringRedisTemplate.opsForList().range("killers:elective:" + stuId, 0, -1);
     }
 
     @Override
