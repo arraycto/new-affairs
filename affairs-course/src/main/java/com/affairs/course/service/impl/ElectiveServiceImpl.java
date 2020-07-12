@@ -6,9 +6,12 @@ import com.affairs.course.mapper.ElectiveMapper;
 import com.affairs.course.service.ICourseService;
 import com.affairs.course.service.IElectiveService;
 import com.affaris.common.to.ElectiveTo;
+import com.affaris.common.vo.ElectiveVo;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
@@ -17,12 +20,11 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * <p>
@@ -37,44 +39,68 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
     @Autowired
     private ICourseService courseService;
 
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RabbitListener(queues = {"course-release-queue"})
     @Transactional(rollbackFor = Exception.class)
-    public void receiveMessageToSaveElective(Message message, String jsonString, Channel channel) throws ExecutionException, InterruptedException, IOException {
-        // 异步编排
-        logger.info("消息接收成功：内容是" + jsonString);
-        logger.info("message:" + message);
-        ElectiveTo electiveTo = JSON.parseObject(jsonString, ElectiveTo.class);
+    public void receiveMessageToSaveElective(Message message, String jsonString, Channel channel) {
+        logger.debug("消息接收成功：内容是" + jsonString);
+        logger.debug("message:" + message);
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        // 提取数据
-        CompletableFuture<Boolean> future1 = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Thread.currentThread().getName() = " + Thread.currentThread().getName());
+        try {
+            ElectiveTo electiveTo = JSON.parseObject(jsonString, ElectiveTo.class);
             // 更新选课表
             Elective elective = new Elective();
             BeanUtils.copyProperties(electiveTo, elective);
-            int flag = baseMapper.insert(elective);
-            return flag > 0;
-        });
-
-        CompletableFuture<Boolean> future2 = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Thread.currentThread().getName() = " + Thread.currentThread().getName());
-            // 更新课程表
-            QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
-            Integer couId = electiveTo.getCouId();
-            courseQueryWrapper.select("cou_count").eq("cou_id", couId);
-            Course course = courseService.getOne(courseQueryWrapper);
-            Integer couCount = course.getCouCount() - 1;
-            // 构造条件更新课程最大人数
-            UpdateWrapper<Course> courseUpdateWrapper = new UpdateWrapper<>();
-            courseUpdateWrapper.set("cou_count", couCount).eq("cou_id", couId);
-            return courseService.update(courseUpdateWrapper);
-        });
-
-        if (future1.get() && future2.get()) {
-            channel.basicAck(deliveryTag, false);
-        } else {
-            channel.basicNack(deliveryTag, false, true);
+            int insert = baseMapper.insert(elective);
+            if (insert > 0) {
+                // 更新课程表
+                QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
+                Integer couId = electiveTo.getCouId();
+                courseQueryWrapper.select("cou_count").eq("cou_id", couId);
+                // 查出当前所选的课程信息
+                Course course = courseService.getOne(courseQueryWrapper);
+                Integer couCount = course.getCouCount() - 1;
+                // 构造条件更新课程最大人数
+                UpdateWrapper<Course> courseUpdateWrapper = new UpdateWrapper<>();
+                courseUpdateWrapper.set("cou_count", couCount).eq("cou_id", couId);
+                boolean update = courseService.update(courseUpdateWrapper);
+                if (update) {
+                    // 一切成功，确认消息
+                    channel.basicAck(deliveryTag, false);
+                } else {
+                    throw new RuntimeException("An error occurred in saving the course selection information, and roll back...");
+                }
+            } else {
+                throw new RuntimeException("An error occurred in saving the course selection information, and roll back...");
+            }
+        } catch (Exception e) {
+            // 拒收消息
+            try {
+                channel.basicNack(deliveryTag, false, false);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            e.printStackTrace();
         }
+
+    }
+
+    /**
+     * 获取当前学生的选课信息
+     *
+     * @param stuId
+     * @param current
+     * @return
+     */
+    @Override
+    public IPage<ElectiveVo> getElectiveVos(Integer stuId, Long current) {
+        Page<ElectiveVo> page = new Page<>();
+        page.setSize(12);
+        page.setCurrent(current);
+        return baseMapper.getElectiveVos(page, stuId);
     }
 }

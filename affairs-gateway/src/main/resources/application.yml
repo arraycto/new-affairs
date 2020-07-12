@@ -34,6 +34,11 @@ spring:
           predicates:
             - Path=/api/course/**
           filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: '#{@hostAddrKeyResolver}'
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 3
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
 
         - id: affairs-killers
@@ -42,10 +47,11 @@ spring:
             - Path=/api/killers/**
           filters:
             - RewritePath=/api(?<segment>/?.*), /$\{segment}
+  redis:
+    host: 192.168.56.20
 
 server:
   port: 88
-
 ---
 spring:
   profiles: pro

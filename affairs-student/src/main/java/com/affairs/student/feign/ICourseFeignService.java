@@ -1,5 +1,7 @@
 package com.affairs.student.feign;
 
+import com.affaris.common.to.DropTo;
+import com.affaris.common.to.ElectivePageTo;
 import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -20,7 +22,7 @@ public interface ICourseFeignService {
      * @return
      */
     @RequestMapping("/course/elective/save")
-    public R save(@RequestBody ElectiveTo electiveTo);
+    R save(@RequestBody ElectiveTo electiveTo);
 
     /**
      * 查询学生已选课程
@@ -29,5 +31,23 @@ public interface ICourseFeignService {
      * @return
      */
     @RequestMapping("/course/elective/isJoin")
-    public R isJoin(@RequestBody Integer stuId);
+    R isJoin(@RequestBody Integer stuId);
+
+    /**
+     * 获取当前学生的已选课程
+     *
+     * @param electivePageTo
+     * @return
+     */
+    @RequestMapping("/course/elective/getSelectedCourse")
+    public R getSelectedCourse(@RequestBody ElectivePageTo electivePageTo);
+
+    /**
+     * 退选课程
+     *
+     * @param dropTo
+     * @return
+     */
+    @RequestMapping("/course/elective/drop")
+    public R drop(@RequestBody DropTo dropTo);
 }

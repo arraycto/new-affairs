@@ -4,6 +4,8 @@ package com.affairs.student.controller;
 import com.affairs.student.entity.Student;
 import com.affairs.student.feign.ICourseFeignService;
 import com.affairs.student.service.IStudentService;
+import com.affaris.common.to.DropTo;
+import com.affaris.common.to.ElectivePageTo;
 import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
 import com.affaris.common.vo.StudentVo;
@@ -12,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
@@ -33,6 +36,7 @@ public class StudentController {
 
     @Autowired
     private ICourseFeignService courseFeignService;
+
 
     /**
      * 保存学生信息
@@ -113,5 +117,50 @@ public class StudentController {
             return R.failed("你的登录会话已过期，请前往首页登录");
         }
         return courseFeignService.isJoin(studentVo.getStuId());
+    }
+
+    /**
+     * 查询当前学生的所有已选课程
+     *
+     * @param session
+     * @return
+     */
+    @RequestMapping("/getSelectedCourse")
+    public R getSelectedCourse(@RequestParam(value = "current", defaultValue = "1") Long current, HttpSession session) {
+        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        if (studentVo == null) {
+            return R.failed("你的登录会话已过期，请前往首页登录");
+        }
+        ElectivePageTo electivePageTo = new ElectivePageTo();
+        electivePageTo.setStuId(studentVo.getStuId());
+        electivePageTo.setCurrent(current);
+        System.out.println("current = " + current);
+        System.out.println("current = " + current.getClass());
+        return courseFeignService.getSelectedCourse(electivePageTo);
+    }
+
+    @RequestMapping("/drop")
+    public R drop(@RequestParam("couId") Integer couId, HttpSession session) {
+        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        if (studentVo == null) {
+            return R.failed("你的登录会话已过期，请前往首页登录");
+        }
+        DropTo dropTo = new DropTo();
+        dropTo.setStuId(studentVo.getStuId());
+        dropTo.setCouId(couId);
+
+        return courseFeignService.drop(dropTo);
+    }
+
+    /**
+     * 清除登录信息
+     *
+     * @param session
+     * @return
+     */
+    @RequestMapping("/invoke")
+    public R invokeSession(HttpSession session) {
+        session.invalidate();
+        return R.success();
     }
 }

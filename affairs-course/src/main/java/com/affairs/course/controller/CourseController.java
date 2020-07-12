@@ -109,7 +109,7 @@ public class CourseController {
      * @return
      */
     @RequestMapping("/list/time")
-    public R listByTime(@RequestParam("current") Long current) {
+    public R listByTime(@RequestParam(value = "current", defaultValue = "1") Long current) {
         // 指定分页大小
         long size = 12;
         IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now(), current);

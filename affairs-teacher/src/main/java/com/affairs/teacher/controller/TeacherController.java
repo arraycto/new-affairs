@@ -128,4 +128,16 @@ public class TeacherController {
         BeanUtils.copyProperties(teacherVo, teacherTo);
         return courseFeignService.listByTeaId(teacherTo);
     }
+
+    /**
+     * 清除登录信息
+     *
+     * @param session
+     * @return
+     */
+    @RequestMapping("/invoke")
+    public R invokeSession(HttpSession session) {
+        session.invalidate();
+        return R.success();
+    }
 }
