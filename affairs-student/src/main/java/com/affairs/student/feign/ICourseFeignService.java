@@ -1,8 +1,7 @@
 package com.affairs.student.feign;
 
-import com.affaris.common.to.DropTo;
+import com.affaris.common.to.AbortCourseTo;
 import com.affaris.common.to.ElectivePageTo;
-import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,38 +15,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @FeignClient("affairs-course")
 public interface ICourseFeignService {
     /**
-     * 保存选课信息
-     *
-     * @param electiveTo
-     * @return
-     */
-    @RequestMapping("/course/elective/save")
-    R save(@RequestBody ElectiveTo electiveTo);
-
-    /**
-     * 查询学生已选课程
+     * 从Redis中获取当前学生已选课程信息用于对加入课程按钮的禁用，防止重复加入
      *
      * @param stuId
      * @return
      */
-    @RequestMapping("/course/elective/isJoin")
-    R isJoin(@RequestBody Integer stuId);
+    @RequestMapping("/course/elective/getSelectedCoursesFromRedis")
+    R getSelectedCoursesFromRedis(@RequestBody Integer stuId);
 
     /**
-     * 获取当前学生的已选课程
+     * 从数据库中查询当前学生的已选课程用于页面展示
      *
      * @param electivePageTo
      * @return
      */
-    @RequestMapping("/course/elective/getSelectedCourse")
-    public R getSelectedCourse(@RequestBody ElectivePageTo electivePageTo);
+    @RequestMapping("/course/elective/getSelectedCourseFromDataBase")
+    public R getSelectedCourseFromDataBase(@RequestBody ElectivePageTo electivePageTo);
 
     /**
      * 退选课程
      *
-     * @param dropTo
+     * @param abortCourseTo
      * @return
      */
-    @RequestMapping("/course/elective/drop")
-    public R drop(@RequestBody DropTo dropTo);
+    @RequestMapping("/course/elective/abortCourse")
+    public R abortCourse(@RequestBody AbortCourseTo abortCourseTo);
 }

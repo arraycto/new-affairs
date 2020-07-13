@@ -5,12 +5,12 @@ package com.affairs.killers.service;
  */
 public interface IKillersService {
     /**
-     * 上架可选课程
+     * 获取截止未来一天内可选的课程缓存到Redis中
      */
-    void getCourse();
+    void saveOptionalCoursesToRedis();
 
     /**
-     * 抢课核心业务
+     * 加入课程
      *
      * @param stuId
      * @param couId
@@ -18,5 +18,5 @@ public interface IKillersService {
      * @param randomCode
      * @return
      */
-    boolean kill(Integer stuId, Integer couId, Integer teaId, String randomCode);
+    boolean grab(Integer stuId, Integer couId, Integer teaId, String randomCode);
 }

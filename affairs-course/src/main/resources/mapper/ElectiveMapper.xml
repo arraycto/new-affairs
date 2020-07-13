@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.affairs.course.mapper.ElectiveMapper">
 
-    <select id="getElectiveVos" resultType="com.affaris.common.vo.ElectiveVo">
+    <select id="getSelectedCourseFromDataBase" resultType="com.affaris.common.vo.ElectiveVo">
         SELECT a.cou_id, a.tea_id, a.elective_time, b.cou_name
         FROM cou_elective a
                  LEFT JOIN cou_course b ON a.stu_id = #{stuId} AND a.cou_id = b.cou_id

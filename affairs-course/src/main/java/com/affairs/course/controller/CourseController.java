@@ -38,12 +38,10 @@ public class CourseController {
      * @param course
      * @return
      */
-    @RequestMapping("/add")
-    public R add(@RequestBody Course course) {
-        // 处理teaId
-
+    @RequestMapping("/addCourse")
+    public R addCourse(@RequestBody Course course) {
         if (!courseService.save(course)) {
-            return R.failed("添加课程失败");
+            return R.fail("添加课程失败");
         }
         return R.success();
     }
@@ -54,31 +52,31 @@ public class CourseController {
      * @param teacherTo
      * @return
      */
-    @RequestMapping("/list/teaId")
-    public R listByTeaId(@RequestBody TeacherTo teacherTo) {
+    @RequestMapping("/getCoursesPageByTeaId")
+    public R getCoursesPageByTeaId(@RequestBody TeacherTo teacherTo) {
         if (teacherTo == null) {
-            return R.failed("请求出错");
+            return R.fail("请求出错");
         }
-        IPage<Course> courseIPage = courseService.selectCoursePage(new Page<Course>(teacherTo.getCurrent(), teacherTo.getSize())
+        IPage<Course> courseIPage = courseService.getCoursesPageByTeaId(new Page<Course>(teacherTo.getCurrent(), teacherTo.getSize())
                 , teacherTo.getTeaId());
         return R.success().put("courseIPage", courseIPage);
     }
 
     /**
-     * 根据couId删除课程
+     * 删除课程
      *
      * @param course
      * @return
      */
-    @RequestMapping("/del/couId")
-    public R delByCouId(@RequestBody Course course) {
+    @RequestMapping("/deleteCourseByCouId")
+    public R deleteCourseByCouId(@RequestBody Course course) {
         // 构造条件
         QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
         courseQueryWrapper.eq("cou_id", course.getCouId());
         if (courseService.remove(courseQueryWrapper)) {
             return R.success();
         }
-        return R.failed("删除失败");
+        return R.fail("删除失败");
     }
 
     /**
@@ -87,7 +85,7 @@ public class CourseController {
      * @param course
      * @return
      */
-    @RequestMapping("/edit")
+    @RequestMapping("/editCourse")
     public R editCourse(@RequestBody Course course) {
         // 构造条件
         QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
@@ -96,47 +94,30 @@ public class CourseController {
         if (courseService.update(course, courseQueryWrapper)) {
             return R.success();
         }
-        return R.failed("修改失败");
+        return R.fail("修改失败");
     }
 
     /**
-     * 分页查询可选的课程
-     * 满足两个条件：
-     * 1. 选课开始
-     * 2. 人数未满
+     * 从Redis中获取截止当前时刻可选的课程（用于页面展示且带有抢课随机码）
      *
-     * @param current 当前页码
+     * @param currentPage
      * @return
      */
-    @RequestMapping("/list/time")
-    public R listByTime(@RequestParam(value = "current", defaultValue = "1") Long current) {
+    @RequestMapping("/getOptionalCoursesPageFromRedis")
+    public R getOptionalCoursesPageFromRedis(@RequestParam("currentPage") Long currentPage) {
         // 指定分页大小
-        long size = 12;
-        IPage<Course> courseIPage = courseService.selectCoursePageByTimeAndCount(new Page<Course>(current, size), LocalDateTime.now(), current);
-        return R.success().put("courseIPage", courseIPage);
-    }
-
-    /**
-     * 从缓存中获取当前可选的课程
-     *
-     * @param current
-     * @return
-     */
-    @RequestMapping("/list/kill")
-    public R listWithKill(@RequestParam("current") Long current) {
-        // 指定分页大小
-        long size = 12;
-        Page<CourseVo> courseIPage = courseService.getListWithKill(current, size, LocalDateTime.now());
+        long pageSize = 12;
+        Page<CourseVo> courseIPage = courseService.getOptionalCoursesPageFromRedis(currentPage, pageSize, LocalDateTime.now());
         return R.success().put("courseVoList", courseIPage);
     }
 
     /**
-     * 查询所有可选课程
+     * 获取截止未来一天内可选的课程（用于定时任务缓存可选课程信息）
      *
      * @return
      */
-    @RequestMapping("/list")
-    public R list() {
+    @RequestMapping("/getOptionalCourses")
+    public R getOptionalCourses() {
         QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
         // 获取到的是未来一天将开始的课程和已开始的课程
         LocalDateTime localDateTime = LocalDateTime.now().plusDays(1);
@@ -145,7 +126,7 @@ public class CourseController {
         if (list != null) {
             return R.success().put("allCourse", list);
         }
-        return R.failed();
+        return R.fail();
     }
 
 }

@@ -1,19 +1,13 @@
 package com.affaris.common.to;
 
 /**
+ * 退选课程所需数据的To
+ *
  * @author Vulgarities
  */
-public class DropTo {
+public class AbortCourseTo {
     private Integer stuId;
     private Integer couId;
-
-    @Override
-    public String toString() {
-        return "DropTo{" +
-                "stuId=" + stuId +
-                ", couId=" + couId +
-                '}';
-    }
 
     public Integer getStuId() {
         return stuId;
@@ -29,5 +23,13 @@ public class DropTo {
 
     public void setCouId(Integer couId) {
         this.couId = couId;
+    }
+
+    @Override
+    public String toString() {
+        return "DropTo{" +
+                "stuId=" + stuId +
+                ", couId=" + couId +
+                '}';
     }
 }

@@ -20,9 +20,15 @@ public interface ICourseFeignService {
      * @param courseTo
      * @return
      */
-    @RequestMapping("/course/course/add")
-    public R add(@RequestBody CourseTo courseTo);
+    @RequestMapping("/course/course/addCourse")
+    public R addCourse(@RequestBody CourseTo courseTo);
 
-    @RequestMapping("/course/course/list/teaId")
-    public R listByTeaId(@RequestBody TeacherTo teacherTo);
+    /**
+     * 获取当前教师所开设的课程
+     *
+     * @param teacherTo
+     * @return
+     */
+    @RequestMapping("/course/course/getCoursesPageByTeaId")
+    public R getCoursesPageByTeaId(@RequestBody TeacherTo teacherTo);
 }

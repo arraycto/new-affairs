@@ -44,9 +44,16 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * 加入课程（消息队列消费者）
+     *
+     * @param message
+     * @param jsonString
+     * @param channel
+     */
     @RabbitListener(queues = {"course-release-queue"})
     @Transactional(rollbackFor = Exception.class)
-    public void receiveMessageToSaveElective(Message message, String jsonString, Channel channel) {
+    public void saveSelectedCourseByMessage(Message message, String jsonString, Channel channel) {
         logger.debug("消息接收成功：内容是" + jsonString);
         logger.debug("message:" + message);
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
@@ -89,18 +96,11 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
 
     }
 
-    /**
-     * 获取当前学生的选课信息
-     *
-     * @param stuId
-     * @param current
-     * @return
-     */
     @Override
-    public IPage<ElectiveVo> getElectiveVos(Integer stuId, Long current) {
+    public IPage<ElectiveVo> getSelectedCourseFromDataBase(Integer stuId, Long current) {
         Page<ElectiveVo> page = new Page<>();
         page.setSize(12);
         page.setCurrent(current);
-        return baseMapper.getElectiveVos(page, stuId);
+        return baseMapper.getSelectedCourseFromDataBase(page, stuId);
     }
 }

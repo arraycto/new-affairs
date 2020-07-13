@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @FeignClient("affairs-course")
 public interface ICourseFeignService {
     /**
-     * 查询所有可选课程
+     * 获取截止未来一天内可选的课程（用于定时任务缓存可选课程信息）
      *
      * @return
      */
-    @RequestMapping("/course/course/list")
-    R list();
+    @RequestMapping("/course/course/getOptionalCourses")
+    R getOptionalCourses();
 }

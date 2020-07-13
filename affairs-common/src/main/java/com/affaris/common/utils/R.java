@@ -39,28 +39,28 @@ public class R extends HashMap<String, Object> {
         return r;
     }
 
-    public static R failed() {
+    public static R fail() {
         R r = new R();
         r.put("code", 500);
         r.put("msg", "FAILED");
         return r;
     }
 
-    public static R failed(String msg) {
+    public static R fail(String msg) {
         R r = new R();
         r.put("code", 500);
         r.put("msg", msg);
         return r;
     }
 
-    public static R failed(int code, String msg) {
+    public static R fail(int code, String msg) {
         R r = new R();
         r.put("code", code);
         r.put("msg", msg);
         return r;
     }
 
-    public static R failed(Map<String, Object> map) {
+    public static R fail(Map<String, Object> map) {
         R r = new R();
         r.putAll(map);
         return r;

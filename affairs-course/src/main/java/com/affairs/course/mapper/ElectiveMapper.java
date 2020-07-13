@@ -16,11 +16,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  */
 public interface ElectiveMapper extends BaseMapper<Elective> {
     /**
-     * 获取当前学生已选课程信息
+     * 从数据库中查询当前学生的已选课程用于页面展示(关联查询)
      *
      * @param page
      * @param stuId
      * @return
      */
-    IPage<ElectiveVo> getElectiveVos(Page<ElectiveVo> page, Integer stuId);
+    IPage<ElectiveVo> getSelectedCourseFromDataBase(Page<ElectiveVo> page, Integer stuId);
 }

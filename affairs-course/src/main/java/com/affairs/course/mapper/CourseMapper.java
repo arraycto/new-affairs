@@ -23,7 +23,7 @@ public interface CourseMapper extends BaseMapper<Course> {
      * @param couBuilder
      * @return
      */
-    IPage<Course> selectPageVo(Page<?> page, Integer couBuilder);
+    IPage<Course> getCoursesPageByTeaId(Page<?> page, Integer couBuilder);
 
     /**
      * 分页查询”可选“的课程

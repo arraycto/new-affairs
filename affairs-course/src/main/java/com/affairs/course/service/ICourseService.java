@@ -25,33 +25,24 @@ public interface ICourseService extends IService<Course> {
      * @param teaId
      * @return
      */
-    IPage<Course> selectCoursePage(Page<Course> page, Integer teaId);
+    IPage<Course> getCoursesPageByTeaId(Page<Course> page, Integer teaId);
+
 
     /**
-     * 分页查询可选的课程，重点在“可选”
+     * 从Redis中获取截止当前时刻可选的课程（用于页面展示且带有抢课随机码）
      *
-     * @param coursePage
-     * @param now
-     * @param current
-     * @return
-     */
-    IPage<Course> selectCoursePageByTimeAndCount(Page<Course> coursePage, LocalDateTime now, Long current);
-
-    /**
-     * 从缓存中获取当前可抢的课程（带有随机码）
-     *
-     * @param current
+     * @param currentPage
      * @param size
      * @param now
      * @return
      */
-    Page<CourseVo> getListWithKill(Long current, long size, LocalDateTime now);
+    Page<CourseVo> getOptionalCoursesPageFromRedis(Long currentPage, long size, LocalDateTime now);
 
     /**
-     * 查询学生已选课程
+     * 从Redis中获取当前学生已选课程信息用于对加入课程按钮的禁用，防止重复加入
      *
      * @param stuId
      * @return
      */
-    List<String> joinCourseList(Integer stuId);
+    List<String> getSelectedCoursesFromRedis(Integer stuId);
 }

@@ -1,7 +1,5 @@
 package com.affaris.common.to;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-
 import java.io.Serializable;
 
 /**
@@ -15,7 +13,6 @@ public class TeacherTo implements Serializable {
     /**
      * 教工号
      */
-    @TableId("tea_id")
     private Integer teaId;
 
     /**
@@ -90,11 +87,13 @@ public class TeacherTo implements Serializable {
 
     @Override
     public String toString() {
-        return "Teacher{" +
+        return "TeacherTo{" +
                 "teaId=" + teaId +
-                ", teaName=" + teaName +
-                ", teaSex=" + teaSex +
-                ", teaPassword=" + teaPassword +
-                "}";
+                ", teaName='" + teaName + '\'' +
+                ", teaSex='" + teaSex + '\'' +
+                ", teaPassword='" + teaPassword + '\'' +
+                ", current=" + current +
+                ", size=" + size +
+                '}';
     }
 }

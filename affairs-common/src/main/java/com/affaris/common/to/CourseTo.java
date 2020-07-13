@@ -1,8 +1,5 @@
 package com.affaris.common.to;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -18,7 +15,6 @@ public class CourseTo implements Serializable {
     /**
      * 课程编号
      */
-    @TableId(value = "cou_id", type = IdType.AUTO)
     private Integer couId;
 
     /**
@@ -83,12 +79,12 @@ public class CourseTo implements Serializable {
 
     @Override
     public String toString() {
-        return "Course{" +
+        return "CourseTo{" +
                 "couId=" + couId +
-                ", couName=" + couName +
-                ", couBuilder=" + couBuilder +
+                ", couName='" + couName + '\'' +
+                ", couBuilder='" + couBuilder + '\'' +
                 ", couCount=" + couCount +
                 ", couTime=" + couTime +
-                "}";
+                '}';
     }
 }

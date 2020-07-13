@@ -15,8 +15,11 @@ public class CourseScheduled {
     @Autowired
     IKillersService killersService;
 
+    /**
+     * 获取截止未来一天内可选的课程缓存到Redis中（定时任务）
+     */
     @Scheduled(cron = "0 0 3 * * ?")
-    public void getCourse() {
-        killersService.getCourse();
+    public void saveOptionalCoursesToRedis() {
+        killersService.saveOptionalCoursesToRedis();
     }
 }

@@ -42,7 +42,7 @@ public class KillersServiceImpl implements IKillersService {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public boolean kill(Integer stuId, Integer couId, Integer teaId, String randomCode) {
+    public boolean grab(Integer stuId, Integer couId, Integer teaId, String randomCode) {
         logger.info("start:" + System.getProperty("user.timezone"));
         // 合法性校验
         BoundHashOperations<String, String, String> hashOperations = stringRedisTemplate.boundHashOps("killers:info");
@@ -74,9 +74,9 @@ public class KillersServiceImpl implements IKillersService {
                             boolean tryAcquire = semaphore.tryAcquire(1);
                             if (tryAcquire) {
                                 // redis中相应课程的最大可选人数减1，方便页面展示
-                                updateCourseVosWithRedis(couId);
+                                updateCouCountInRedis(couId);
                                 // 在redis中做一份选课表缓存
-                                saveELectiveWithRedis(stuId, couId);
+                                saveSelectedCourseToRedis(stuId, couId);
 
                                 // 抢课成功交给课程服务处理
                                 ElectiveTo electiveTo = new ElectiveTo();
@@ -99,12 +99,12 @@ public class KillersServiceImpl implements IKillersService {
     }
 
     /**
-     * 在redis中做一份选课表的缓存
+     * 在redis中做一份选课表的缓存（方便快速查询已选课程）
      *
      * @param stuId
      * @param couId
      */
-    private void saveELectiveWithRedis(Integer stuId, Integer couId) {
+    private void saveSelectedCourseToRedis(Integer stuId, Integer couId) {
         // 在redis中存一份已选课程表，key为当前学生id，值为已选课程id
         ListOperations<String, String> opsForList = stringRedisTemplate.opsForList();
         opsForList.leftPush("killers:elective:" + stuId, String.valueOf(couId));
@@ -117,7 +117,7 @@ public class KillersServiceImpl implements IKillersService {
      *
      * @param couId
      */
-    private void updateCourseVosWithRedis(Integer couId) {
+    private void updateCouCountInRedis(Integer couId) {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         // 获取redis中已上架的课程信息
         String str = ops.get("killers:courseVos");
@@ -142,8 +142,9 @@ public class KillersServiceImpl implements IKillersService {
     }
 
     @Override
-    public void getCourse() {
-        R courseList = courseFeignService.list();
+    public void saveOptionalCoursesToRedis() {
+        // 从数据库中获取获取截止未来一天内可选的课程
+        R courseList = courseFeignService.getOptionalCourses();
         Integer code = (Integer) courseList.get("code");
         int successCode = 200;
         if (successCode == code) {

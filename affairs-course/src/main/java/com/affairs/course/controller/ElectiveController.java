@@ -4,7 +4,7 @@ package com.affairs.course.controller;
 import com.affairs.course.entity.Elective;
 import com.affairs.course.service.ICourseService;
 import com.affairs.course.service.IElectiveService;
-import com.affaris.common.to.DropTo;
+import com.affaris.common.to.AbortCourseTo;
 import com.affaris.common.to.ElectivePageTo;
 import com.affaris.common.utils.R;
 import com.affaris.common.vo.ElectiveVo;
@@ -35,13 +35,13 @@ public class ElectiveController {
     private ICourseService courseService;
 
     /**
-     * 查询学生已选课程
+     * 从Redis中获取当前学生已选课程信息用于对加入课程按钮的禁用，防止重复加入
      *
      * @return
      */
-    @RequestMapping("/isJoin")
-    public R isJoin(@RequestBody Integer stuId) {
-        List<String> courses = courseService.joinCourseList(stuId);
+    @RequestMapping("/getSelectedCoursesFromRedis")
+    public R getSelectedCoursesFromRedis(@RequestBody Integer stuId) {
+        List<String> courses = courseService.getSelectedCoursesFromRedis(stuId);
         if (courses == null) {
             return R.success();
         }
@@ -49,36 +49,35 @@ public class ElectiveController {
     }
 
     /**
-     * 获取当前学生已选课程
+     * 从数据库中查询当前学生的已选课程用于页面展示
      *
      * @param electivePageTo
      * @return
      */
-    @RequestMapping("/getSelectedCourse")
-    public R getSelectedCourse(@RequestBody ElectivePageTo electivePageTo) {
+    @RequestMapping("/getSelectedCourseFromDataBase")
+    public R getSelectedCourseFromDataBase(@RequestBody ElectivePageTo electivePageTo) {
         Integer stuId = electivePageTo.getStuId();
         Long current = electivePageTo.getCurrent();
-        IPage<ElectiveVo> electiveVos = electiveService.getElectiveVos(stuId, current);
-        System.out.println("electiveVos = " + electiveVos);
+        IPage<ElectiveVo> electiveVos = electiveService.getSelectedCourseFromDataBase(stuId, current);
         return R.success().put("electiveVos", electiveVos);
     }
 
     /**
      * 退选课程
      *
-     * @param dropTo
+     * @param abortCourseTo
      * @return
      */
-    @RequestMapping("/drop")
-    public R drop(@RequestBody DropTo dropTo) {
+    @RequestMapping("/abortCourse")
+    public R abortCourse(@RequestBody AbortCourseTo abortCourseTo) {
         String stuId = "stu_id";
         String couId = "cou_id";
         QueryWrapper<Elective> electiveQueryWrapper = new QueryWrapper<>();
-        electiveQueryWrapper.eq(stuId, dropTo.getStuId()).eq(couId, dropTo.getCouId());
+        electiveQueryWrapper.eq(stuId, abortCourseTo.getStuId()).eq(couId, abortCourseTo.getCouId());
         if (electiveService.remove(electiveQueryWrapper)) {
             return R.success();
         } else {
-            return R.failed("删除失败！");
+            return R.fail("删除失败！");
         }
     }
 }

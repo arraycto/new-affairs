@@ -40,15 +40,15 @@ public class TeacherController {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 保存教师信息
+     * 新增教师
      *
      * @param teacher
      * @return
      */
-    @RequestMapping("/add")
+    @RequestMapping("/addTeacher")
     public R addTeacher(@RequestBody Teacher teacher) {
         if (teacher == null) {
-            return R.failed("提交的内容经解析后为null");
+            return R.fail("提交的内容经解析后为null");
         }
         // 查询账号是否重复
         String teaId = "tea_id";
@@ -57,7 +57,7 @@ public class TeacherController {
             teacherService.save(teacher);
             return R.success();
         }
-        return R.failed("账号已存在");
+        return R.fail("账号已存在");
     }
 
     /**
@@ -69,7 +69,7 @@ public class TeacherController {
     @RequestMapping("/login")
     public R login(@RequestBody Teacher teacher, HttpSession session) {
         if (teacher == null) {
-            return R.failed("提交的内容经解析后为null");
+            return R.fail("提交的内容经解析后为null");
         }
         String teaId = "tea_id";
         String teaPassword = "tea_password";
@@ -83,10 +83,10 @@ public class TeacherController {
                 session.setAttribute("teacherVo", teacherVo);
                 return R.success();
             } else {
-                return R.failed("密码有误");
+                return R.fail("密码有误");
             }
         }
-        return R.failed("查无此人");
+        return R.fail("查无此人");
     }
 
     /**
@@ -100,37 +100,37 @@ public class TeacherController {
     public R addCourse(@RequestBody CourseTo courseTo, HttpSession session) {
         TeacherVo teacherVo = (TeacherVo) session.getAttribute("teacherVo");
         if (teacherVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页重新登录");
+            return R.fail("你的登录会话已过期，请前往首页重新登录");
         }
         courseTo.setCouBuilder(String.valueOf(teacherVo.getTeaId()));
         // 将UTC时间调整为CST时间
         courseTo.setCouTime(courseTo.getCouTime().plusHours(8));
         logger.info("CST:" + courseTo.getCouTime());
-        courseFeignService.add(courseTo);
+        courseFeignService.addCourse(courseTo);
         return R.success();
     }
 
     /**
-     * 查询教师所开设的课程
+     * 获取当前教师所开设的课程
      *
      * @param session
      * @return
      */
-    @RequestMapping("/list/teaId")
-    public R listOfTeaId(@RequestParam(value = "current", defaultValue = "1") Long current, HttpSession session) {
+    @RequestMapping("/getCoursesPageByTeaId")
+    public R getCoursesPageByTeaId(@RequestParam(value = "currentPage", defaultValue = "1") Long currentPage, HttpSession session) {
         TeacherVo teacherVo = (TeacherVo) session.getAttribute("teacherVo");
         if (teacherVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页重新登录");
+            return R.fail("你的登录会话已过期，请前往首页重新登录");
         }
         TeacherTo teacherTo = new TeacherTo();
-        teacherTo.setCurrent(current);
+        teacherTo.setCurrent(currentPage);
         teacherTo.setSize(12);
         BeanUtils.copyProperties(teacherVo, teacherTo);
-        return courseFeignService.listByTeaId(teacherTo);
+        return courseFeignService.getCoursesPageByTeaId(teacherTo);
     }
 
     /**
-     * 清除登录信息
+     * 退出登录
      *
      * @param session
      * @return

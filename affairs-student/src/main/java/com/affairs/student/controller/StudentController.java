@@ -4,9 +4,8 @@ package com.affairs.student.controller;
 import com.affairs.student.entity.Student;
 import com.affairs.student.feign.ICourseFeignService;
 import com.affairs.student.service.IStudentService;
-import com.affaris.common.to.DropTo;
+import com.affaris.common.to.AbortCourseTo;
 import com.affaris.common.to.ElectivePageTo;
-import com.affaris.common.to.ElectiveTo;
 import com.affaris.common.utils.R;
 import com.affaris.common.vo.StudentVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -39,15 +37,15 @@ public class StudentController {
 
 
     /**
-     * 保存学生信息
+     * 新增学生
      *
      * @param student
      * @return
      */
-    @RequestMapping("/add")
+    @RequestMapping("/addStudent")
     public R addStudent(@RequestBody Student student) {
         if (student == null) {
-            return R.failed("提交的内容经解析后为null");
+            return R.fail("提交的内容经解析后为null");
         }
         // 查询账号是否重复
         String stuId = "stu_id";
@@ -56,7 +54,7 @@ public class StudentController {
             studentService.save(student);
             return R.success();
         }
-        return R.failed("账号已存在");
+        return R.fail("账号已存在");
     }
 
     /**
@@ -68,7 +66,7 @@ public class StudentController {
     @RequestMapping("/login")
     public R login(@RequestBody Student student, HttpSession session) {
         if (student == null) {
-            return R.failed("提交的内容经解析后为null");
+            return R.fail("提交的内容经解析后为null");
         }
         String stuId = "stu_id";
         String stuPassword = "stu_password";
@@ -81,79 +79,66 @@ public class StudentController {
                 session.setAttribute("studentVo", studentVo);
                 return R.success();
             } else {
-                return R.failed("密码有误");
+                return R.fail("密码有误");
             }
         }
-        return R.failed("查无此人");
+        return R.fail("查无此人");
     }
 
     /**
-     * 保存选课信息
-     *
-     * @param electiveTo
-     * @param session
-     * @return
-     */
-    @RequestMapping("/saveElective")
-    public R saveElective(@RequestBody ElectiveTo electiveTo, HttpSession session) {
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
-        if (studentVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页登录");
-        }
-        electiveTo.setStuId(studentVo.getStuId());
-        electiveTo.setElectiveTime(LocalDateTime.now());
-        return courseFeignService.save(electiveTo);
-    }
-
-    /**
-     * 查询是否已选该课程
+     * 从Redis中获取当前学生已选课程信息用于对加入课程按钮的禁用，防止重复加入
      *
      * @return
      */
-    @RequestMapping("/isJoin")
-    public R isJoin(HttpSession session) {
+    @RequestMapping("/getSelectedCoursesFromRedis")
+    public R getSelectedCoursesFromRedis(HttpSession session) {
         StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
         if (studentVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页登录");
+            return R.fail("你的登录会话已过期，请前往首页登录");
         }
-        return courseFeignService.isJoin(studentVo.getStuId());
+        return courseFeignService.getSelectedCoursesFromRedis(studentVo.getStuId());
     }
 
     /**
-     * 查询当前学生的所有已选课程
+     * 从数据库中查询当前学生的已选课程用于页面展示
      *
      * @param session
      * @return
      */
-    @RequestMapping("/getSelectedCourse")
-    public R getSelectedCourse(@RequestParam(value = "current", defaultValue = "1") Long current, HttpSession session) {
+    @RequestMapping("/getSelectedCourseFromDataBase")
+    public R getSelectedCourseFromDataBase(@RequestParam(value = "currentPage", defaultValue = "1") Long currentPage, HttpSession session) {
         StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
         if (studentVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页登录");
+            return R.fail("你的登录会话已过期，请前往首页登录");
         }
         ElectivePageTo electivePageTo = new ElectivePageTo();
         electivePageTo.setStuId(studentVo.getStuId());
-        electivePageTo.setCurrent(current);
-        System.out.println("current = " + current);
-        System.out.println("current = " + current.getClass());
-        return courseFeignService.getSelectedCourse(electivePageTo);
-    }
-
-    @RequestMapping("/drop")
-    public R drop(@RequestParam("couId") Integer couId, HttpSession session) {
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
-        if (studentVo == null) {
-            return R.failed("你的登录会话已过期，请前往首页登录");
-        }
-        DropTo dropTo = new DropTo();
-        dropTo.setStuId(studentVo.getStuId());
-        dropTo.setCouId(couId);
-
-        return courseFeignService.drop(dropTo);
+        electivePageTo.setCurrent(currentPage);
+        return courseFeignService.getSelectedCourseFromDataBase(electivePageTo);
     }
 
     /**
-     * 清除登录信息
+     * 退选课程
+     *
+     * @param couId
+     * @param session
+     * @return
+     */
+    @RequestMapping("/abortCourse")
+    public R drop(@RequestParam("couId") Integer couId, HttpSession session) {
+        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        if (studentVo == null) {
+            return R.fail("你的登录会话已过期，请前往首页登录");
+        }
+        AbortCourseTo abortCourseTo = new AbortCourseTo();
+        abortCourseTo.setStuId(studentVo.getStuId());
+        abortCourseTo.setCouId(couId);
+
+        return courseFeignService.abortCourse(abortCourseTo);
+    }
+
+    /**
+     * 退出登录
      *
      * @param session
      * @return

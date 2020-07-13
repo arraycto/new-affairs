@@ -1,6 +1,8 @@
 package com.affaris.common.to;
 
 /**
+ * 获取选课表分页信息远程调用的To
+ *
  * @author Vulgarities
  */
 public class ElectivePageTo {

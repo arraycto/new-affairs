@@ -15,11 +15,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IElectiveService extends IService<Elective> {
     /**
-     * 获取当前学生的已选课程信息
+     * 从数据库中查询当前学生的已选课程用于页面展示
      *
      * @param stuId
      * @param current
      * @return
      */
-    IPage<ElectiveVo> getElectiveVos(Integer stuId, Long current);
+    IPage<ElectiveVo> getSelectedCourseFromDataBase(Integer stuId, Long current);
 }
