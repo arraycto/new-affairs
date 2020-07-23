@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * @author Vulgarities
  */
-public class ElectiveVo {
+public class ElectiveVO {
     /**
      * 课程编号
      */

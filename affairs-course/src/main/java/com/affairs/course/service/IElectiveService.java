@@ -1,7 +1,7 @@
 package com.affairs.course.service;
 
 import com.affairs.course.entity.Elective;
-import com.affaris.common.vo.ElectiveVo;
+import com.affaris.common.vo.ElectiveVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -21,5 +21,5 @@ public interface IElectiveService extends IService<Elective> {
      * @param current
      * @return
      */
-    IPage<ElectiveVo> getSelectedCourseFromDataBase(Integer stuId, Long current);
+    IPage<ElectiveVO> getSelectedCourseFromDataBase(Integer stuId, Long current);
 }

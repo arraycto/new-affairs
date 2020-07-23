@@ -1,4 +1,4 @@
-package com.affaris.common.to;
+package com.affaris.common.dto;
 
 import java.time.LocalDateTime;
 
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  *
  * @author Vulgarities
  */
-public class ElectiveTo {
+public class ElectiveDTO {
     /**
      * 选课编号
      */

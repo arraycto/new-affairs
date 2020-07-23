@@ -4,10 +4,10 @@ package com.affairs.student.controller;
 import com.affairs.student.entity.Student;
 import com.affairs.student.feign.ICourseFeignService;
 import com.affairs.student.service.IStudentService;
-import com.affaris.common.to.AbortCourseTo;
-import com.affaris.common.to.ElectivePageTo;
+import com.affaris.common.dto.AbortCourseDTO;
+import com.affaris.common.dto.ElectivePageDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.StudentVo;
+import com.affaris.common.vo.StudentVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +74,7 @@ public class StudentController {
         if (studentServiceOne != null) {
             if (student.getStuPassword().equals(studentServiceOne.getStuPassword())) {
                 // 保存到session中
-                StudentVo studentVo = new StudentVo();
+                StudentVO studentVo = new StudentVO();
                 BeanUtils.copyProperties(student, studentVo);
                 session.setAttribute("studentVo", studentVo);
                 return R.success();
@@ -92,7 +92,7 @@ public class StudentController {
      */
     @RequestMapping("/getSelectedCoursesFromRedis")
     public R getSelectedCoursesFromRedis(HttpSession session) {
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        StudentVO studentVo = (StudentVO) session.getAttribute("studentVo");
         if (studentVo == null) {
             return R.fail("你的登录会话已过期，请前往首页登录");
         }
@@ -107,14 +107,14 @@ public class StudentController {
      */
     @RequestMapping("/getSelectedCourseFromDataBase")
     public R getSelectedCourseFromDataBase(@RequestParam(value = "currentPage", defaultValue = "1") Long currentPage, HttpSession session) {
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        StudentVO studentVo = (StudentVO) session.getAttribute("studentVo");
         if (studentVo == null) {
             return R.fail("你的登录会话已过期，请前往首页登录");
         }
-        ElectivePageTo electivePageTo = new ElectivePageTo();
-        electivePageTo.setStuId(studentVo.getStuId());
-        electivePageTo.setCurrent(currentPage);
-        return courseFeignService.getSelectedCourseFromDataBase(electivePageTo);
+        ElectivePageDTO electivePageDTO = new ElectivePageDTO();
+        electivePageDTO.setStuId(studentVo.getStuId());
+        electivePageDTO.setCurrent(currentPage);
+        return courseFeignService.getSelectedCourseFromDataBase(electivePageDTO);
     }
 
     /**
@@ -126,15 +126,15 @@ public class StudentController {
      */
     @RequestMapping("/abortCourse")
     public R drop(@RequestParam("couId") Integer couId, HttpSession session) {
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        StudentVO studentVo = (StudentVO) session.getAttribute("studentVo");
         if (studentVo == null) {
             return R.fail("你的登录会话已过期，请前往首页登录");
         }
-        AbortCourseTo abortCourseTo = new AbortCourseTo();
-        abortCourseTo.setStuId(studentVo.getStuId());
-        abortCourseTo.setCouId(couId);
+        AbortCourseDTO abortCourseDTO = new AbortCourseDTO();
+        abortCourseDTO.setStuId(studentVo.getStuId());
+        abortCourseDTO.setCouId(couId);
 
-        return courseFeignService.abortCourse(abortCourseTo);
+        return courseFeignService.abortCourse(abortCourseDTO);
     }
 
     /**

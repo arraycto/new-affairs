@@ -3,9 +3,9 @@ package com.affairs.course.controller;
 
 import com.affairs.course.entity.Course;
 import com.affairs.course.service.ICourseService;
-import com.affaris.common.to.TeacherTo;
+import com.affaris.common.dto.TeacherDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.CourseVo;
+import com.affaris.common.vo.CourseVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,16 +49,16 @@ public class CourseController {
     /**
      * 分页查询指定教师开设的课程
      *
-     * @param teacherTo
+     * @param teacherDTO
      * @return
      */
     @RequestMapping("/getCoursesPageByTeaId")
-    public R getCoursesPageByTeaId(@RequestBody TeacherTo teacherTo) {
-        if (teacherTo == null) {
+    public R getCoursesPageByTeaId(@RequestBody TeacherDTO teacherDTO) {
+        if (teacherDTO == null) {
             return R.fail("请求出错");
         }
-        IPage<Course> courseIPage = courseService.getCoursesPageByTeaId(new Page<Course>(teacherTo.getCurrent(), teacherTo.getSize())
-                , teacherTo.getTeaId());
+        IPage<Course> courseIPage = courseService.getCoursesPageByTeaId(new Page<Course>(teacherDTO.getCurrent(), teacherDTO.getSize())
+                , teacherDTO.getTeaId());
         return R.success().put("courseIPage", courseIPage);
     }
 
@@ -107,7 +107,7 @@ public class CourseController {
     public R getOptionalCoursesPageFromRedis(@RequestParam("currentPage") Long currentPage) {
         // 指定分页大小
         long pageSize = 12;
-        Page<CourseVo> courseIPage = courseService.getOptionalCoursesPageFromRedis(currentPage, pageSize, LocalDateTime.now());
+        Page<CourseVO> courseIPage = courseService.getOptionalCoursesPageFromRedis(currentPage, pageSize, LocalDateTime.now());
         return R.success().put("courseVoList", courseIPage);
     }
 

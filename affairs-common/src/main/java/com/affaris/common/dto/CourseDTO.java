@@ -1,4 +1,4 @@
-package com.affaris.common.to;
+package com.affaris.common.dto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  *
  * @author Vulgarities
  */
-public class CourseTo implements Serializable {
+public class CourseDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

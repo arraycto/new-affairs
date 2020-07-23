@@ -1,11 +1,11 @@
-package com.affaris.common.to;
+package com.affaris.common.dto;
 
 /**
  * 获取选课表分页信息远程调用的To
  *
  * @author Vulgarities
  */
-public class ElectivePageTo {
+public class ElectivePageDTO {
     private Integer stuId;
     private Long current;
 

@@ -2,9 +2,9 @@ package com.affairs.killers.service.impl;
 
 import com.affairs.killers.feign.ICourseFeignService;
 import com.affairs.killers.service.IKillersService;
-import com.affaris.common.to.ElectiveTo;
+import com.affaris.common.dto.ElectiveDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.CourseVo;
+import com.affaris.common.vo.CourseVO;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import org.redisson.api.RSemaphore;
@@ -50,7 +50,7 @@ public class KillersServiceImpl implements IKillersService {
         logger.info("开始抢课");
         logger.info("courseVoStr" + courseVoStr);
         if (!StringUtils.isEmpty(courseVoStr)) {
-            CourseVo courseVo = JSON.parseObject(courseVoStr, CourseVo.class);
+            CourseVO courseVo = JSON.parseObject(courseVoStr, CourseVO.class);
             logger.info("从redis中获取到的CourseVo:" + courseVo);
             if (courseVo != null) {
                 // 多重校验在合法时间内
@@ -79,13 +79,13 @@ public class KillersServiceImpl implements IKillersService {
                                 saveSelectedCourseToRedis(stuId, couId);
 
                                 // 抢课成功交给课程服务处理
-                                ElectiveTo electiveTo = new ElectiveTo();
-                                electiveTo.setStuId(stuId);
-                                electiveTo.setCouId(couId);
-                                electiveTo.setTeaId(teaId);
-                                electiveTo.setElectiveTime(LocalDateTime.now());
+                                ElectiveDTO electiveDTO = new ElectiveDTO();
+                                electiveDTO.setStuId(stuId);
+                                electiveDTO.setCouId(couId);
+                                electiveDTO.setTeaId(teaId);
+                                electiveDTO.setElectiveTime(LocalDateTime.now());
                                 // 发送消息
-                                String jsonString = JSON.toJSONString(electiveTo);
+                                String jsonString = JSON.toJSONString(electiveDTO);
                                 rabbitTemplate.convertAndSend("course-event-exchange", "course", jsonString);
                                 logger.info("消息发送成功，内容是" + jsonString);
                                 return true;
@@ -121,18 +121,18 @@ public class KillersServiceImpl implements IKillersService {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         // 获取redis中已上架的课程信息
         String str = ops.get("killers:courseVos");
-        List<CourseVo> courseVoListTmp = JSON.parseObject(str, new TypeReference<List<CourseVo>>() {
+        List<CourseVO> courseVOListTmp = JSON.parseObject(str, new TypeReference<List<CourseVO>>() {
         });
-        if (courseVoListTmp != null) {
+        if (courseVOListTmp != null) {
             // redis中相应课程的最大可选人数减1，方便页面展示
-            for (CourseVo vo : courseVoListTmp) {
+            for (CourseVO vo : courseVOListTmp) {
                 if (couId.equals(vo.getCouId())) {
                     vo.setCouCount(vo.getCouCount() - 1);
                     break;
                 }
             }
             // 更新redis中的killers:courseVos
-            String jsonString = JSON.toJSONString(courseVoListTmp);
+            String jsonString = JSON.toJSONString(courseVOListTmp);
             LocalDateTime timeTmp = LocalDateTime.now().plusDays(1).withHour(3).withMinute(0).withSecond(0);
             logger.info(timeTmp.toString());
             long endTime = timeTmp.toInstant(ZoneOffset.of("+8")).toEpochMilli();
@@ -151,10 +151,10 @@ public class KillersServiceImpl implements IKillersService {
             // 此处存在类型转换的坑
             List<?> allCourse = (List<?>) courseList.get("allCourse");
             String str = JSON.toJSONString(allCourse);
-            List<CourseVo> courseVos = JSON.parseObject(str, new TypeReference<List<CourseVo>>() {
+            List<CourseVO> courseVOS = JSON.parseObject(str, new TypeReference<List<CourseVO>>() {
             });
 
-            courseVos.forEach(obj -> {
+            courseVOS.forEach(obj -> {
                 // 为每个课程添加自己独一无二的随机码
                 String randomCode = UUID.randomUUID().toString().replace("-", "");
                 obj.setRandomCode(randomCode);
@@ -172,7 +172,7 @@ public class KillersServiceImpl implements IKillersService {
             });
 
             // 将可选的课程信息加入缓存
-            String courseVosString = JSON.toJSONString(courseVos);
+            String courseVosString = JSON.toJSONString(courseVOS);
             stringRedisTemplate.opsForValue().set("killers:courseVos", courseVosString, Duration.ofDays(1));
         }
     }

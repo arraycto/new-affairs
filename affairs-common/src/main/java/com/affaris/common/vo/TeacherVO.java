@@ -3,7 +3,7 @@ package com.affaris.common.vo;
 /**
  * @author Vulgarities
  */
-public class TeacherVo {
+public class TeacherVO {
     /**
      * 教工号
      */

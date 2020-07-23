@@ -1,7 +1,7 @@
 package com.affairs.course.service;
 
 import com.affairs.course.entity.Course;
-import com.affaris.common.vo.CourseVo;
+import com.affaris.common.vo.CourseVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -36,7 +36,7 @@ public interface ICourseService extends IService<Course> {
      * @param now
      * @return
      */
-    Page<CourseVo> getOptionalCoursesPageFromRedis(Long currentPage, long size, LocalDateTime now);
+    Page<CourseVO> getOptionalCoursesPageFromRedis(Long currentPage, long size, LocalDateTime now);
 
     /**
      * 从Redis中获取当前学生已选课程信息用于对加入课程按钮的禁用，防止重复加入

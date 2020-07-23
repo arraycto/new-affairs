@@ -1,11 +1,11 @@
-package com.affaris.common.to;
+package com.affaris.common.dto;
 
 /**
  * 退选课程所需数据的To
  *
  * @author Vulgarities
  */
-public class AbortCourseTo {
+public class AbortCourseDTO {
     private Integer stuId;
     private Integer couId;
 

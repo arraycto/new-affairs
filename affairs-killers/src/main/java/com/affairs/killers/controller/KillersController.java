@@ -1,9 +1,9 @@
 package com.affairs.killers.controller;
 
 import com.affairs.killers.service.IKillersService;
-import com.affaris.common.to.ElectiveTo;
+import com.affaris.common.dto.ElectiveDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.StudentVo;
+import com.affaris.common.vo.StudentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,18 +30,18 @@ public class KillersController {
      * @return
      */
     @RequestMapping("/grab")
-    public R grab(@RequestBody ElectiveTo electiveTo, HttpSession session) {
+    public R grab(@RequestBody ElectiveDTO electiveDTO, HttpSession session) {
         // 当前登录的学生信息
-        StudentVo studentVo = (StudentVo) session.getAttribute("studentVo");
+        StudentVO studentVo = (StudentVO) session.getAttribute("studentVo");
         if (studentVo != null) {
             // 学号
             Integer stuId = studentVo.getStuId();
             // 课程号
-            Integer couId = electiveTo.getCouId();
+            Integer couId = electiveDTO.getCouId();
             // 教师号
-            Integer teaId = electiveTo.getTeaId();
+            Integer teaId = electiveDTO.getTeaId();
             // 随机码
-            String randomCode = electiveTo.getRandomCode();
+            String randomCode = electiveDTO.getRandomCode();
 
             boolean flag = killersService.grab(stuId, couId, teaId, randomCode);
 

@@ -4,10 +4,10 @@ package com.affairs.course.controller;
 import com.affairs.course.entity.Elective;
 import com.affairs.course.service.ICourseService;
 import com.affairs.course.service.IElectiveService;
-import com.affaris.common.to.AbortCourseTo;
-import com.affaris.common.to.ElectivePageTo;
+import com.affaris.common.dto.AbortCourseDTO;
+import com.affaris.common.dto.ElectivePageDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.ElectiveVo;
+import com.affaris.common.vo.ElectiveVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,29 +51,29 @@ public class ElectiveController {
     /**
      * 从数据库中查询当前学生的已选课程用于页面展示
      *
-     * @param electivePageTo
+     * @param electivePageDTO
      * @return
      */
     @RequestMapping("/getSelectedCourseFromDataBase")
-    public R getSelectedCourseFromDataBase(@RequestBody ElectivePageTo electivePageTo) {
-        Integer stuId = electivePageTo.getStuId();
-        Long current = electivePageTo.getCurrent();
-        IPage<ElectiveVo> electiveVos = electiveService.getSelectedCourseFromDataBase(stuId, current);
+    public R getSelectedCourseFromDataBase(@RequestBody ElectivePageDTO electivePageDTO) {
+        Integer stuId = electivePageDTO.getStuId();
+        Long current = electivePageDTO.getCurrent();
+        IPage<ElectiveVO> electiveVos = electiveService.getSelectedCourseFromDataBase(stuId, current);
         return R.success().put("electiveVos", electiveVos);
     }
 
     /**
      * 退选课程
      *
-     * @param abortCourseTo
+     * @param abortCourseDTO
      * @return
      */
     @RequestMapping("/abortCourse")
-    public R abortCourse(@RequestBody AbortCourseTo abortCourseTo) {
+    public R abortCourse(@RequestBody AbortCourseDTO abortCourseDTO) {
         String stuId = "stu_id";
         String couId = "cou_id";
         QueryWrapper<Elective> electiveQueryWrapper = new QueryWrapper<>();
-        electiveQueryWrapper.eq(stuId, abortCourseTo.getStuId()).eq(couId, abortCourseTo.getCouId());
+        electiveQueryWrapper.eq(stuId, abortCourseDTO.getStuId()).eq(couId, abortCourseDTO.getCouId());
         if (electiveService.remove(electiveQueryWrapper)) {
             return R.success();
         } else {

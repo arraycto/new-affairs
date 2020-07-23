@@ -1,4 +1,4 @@
-package com.affaris.common.to;
+package com.affaris.common.dto;
 
 import java.io.Serializable;
 
@@ -7,7 +7,7 @@ import java.io.Serializable;
  *
  * @author Vulgarities
  */
-public class TeacherTo implements Serializable {
+public class TeacherDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -34,7 +34,7 @@ public class TeacherTo implements Serializable {
 
     private long size;
 
-    public TeacherTo() {
+    public TeacherDTO() {
     }
 
     public Integer getTeaId() {

@@ -5,8 +5,8 @@ import com.affairs.course.entity.Elective;
 import com.affairs.course.mapper.ElectiveMapper;
 import com.affairs.course.service.ICourseService;
 import com.affairs.course.service.IElectiveService;
-import com.affaris.common.to.ElectiveTo;
-import com.affaris.common.vo.ElectiveVo;
+import com.affaris.common.dto.ElectiveDTO;
+import com.affaris.common.vo.ElectiveVO;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -58,15 +58,15 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
         logger.debug("message:" + message);
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
         try {
-            ElectiveTo electiveTo = JSON.parseObject(jsonString, ElectiveTo.class);
+            ElectiveDTO electiveDTO = JSON.parseObject(jsonString, ElectiveDTO.class);
             // 更新选课表
             Elective elective = new Elective();
-            BeanUtils.copyProperties(electiveTo, elective);
+            BeanUtils.copyProperties(electiveDTO, elective);
             int insert = baseMapper.insert(elective);
             if (insert > 0) {
                 // 更新课程表
                 QueryWrapper<Course> courseQueryWrapper = new QueryWrapper<>();
-                Integer couId = electiveTo.getCouId();
+                Integer couId = electiveDTO.getCouId();
                 courseQueryWrapper.select("cou_count").eq("cou_id", couId);
                 // 查出当前所选的课程信息
                 Course course = courseService.getOne(courseQueryWrapper);
@@ -97,8 +97,8 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
     }
 
     @Override
-    public IPage<ElectiveVo> getSelectedCourseFromDataBase(Integer stuId, Long current) {
-        Page<ElectiveVo> page = new Page<>();
+    public IPage<ElectiveVO> getSelectedCourseFromDataBase(Integer stuId, Long current) {
+        Page<ElectiveVO> page = new Page<>();
         page.setSize(12);
         page.setCurrent(current);
         return baseMapper.getSelectedCourseFromDataBase(page, stuId);

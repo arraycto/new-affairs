@@ -4,10 +4,10 @@ package com.affairs.teacher.controller;
 import com.affairs.teacher.entity.Teacher;
 import com.affairs.teacher.feign.ICourseFeignService;
 import com.affairs.teacher.service.ITeacherService;
-import com.affaris.common.to.CourseTo;
-import com.affaris.common.to.TeacherTo;
+import com.affaris.common.dto.CourseDTO;
+import com.affaris.common.dto.TeacherDTO;
 import com.affaris.common.utils.R;
-import com.affaris.common.vo.TeacherVo;
+import com.affaris.common.vo.TeacherVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class TeacherController {
         if (teacherServiceOne != null) {
             if (teacher.getTeaPassword().equals(teacherServiceOne.getTeaPassword())) {
                 // 存入session
-                TeacherVo teacherVo = new TeacherVo();
+                TeacherVO teacherVo = new TeacherVO();
                 BeanUtils.copyProperties(teacher, teacherVo);
                 session.setAttribute("teacherVo", teacherVo);
                 return R.success();
@@ -92,21 +92,21 @@ public class TeacherController {
     /**
      * 新建课程
      *
-     * @param courseTo
+     * @param courseDTO
      * @param session
      * @return
      */
     @RequestMapping("/addCourse")
-    public R addCourse(@RequestBody CourseTo courseTo, HttpSession session) {
-        TeacherVo teacherVo = (TeacherVo) session.getAttribute("teacherVo");
+    public R addCourse(@RequestBody CourseDTO courseDTO, HttpSession session) {
+        TeacherVO teacherVo = (TeacherVO) session.getAttribute("teacherVo");
         if (teacherVo == null) {
             return R.fail("你的登录会话已过期，请前往首页重新登录");
         }
-        courseTo.setCouBuilder(String.valueOf(teacherVo.getTeaId()));
+        courseDTO.setCouBuilder(String.valueOf(teacherVo.getTeaId()));
         // 将UTC时间调整为CST时间
-        courseTo.setCouTime(courseTo.getCouTime().plusHours(8));
-        logger.info("CST:" + courseTo.getCouTime());
-        courseFeignService.addCourse(courseTo);
+        courseDTO.setCouTime(courseDTO.getCouTime().plusHours(8));
+        logger.info("CST:" + courseDTO.getCouTime());
+        courseFeignService.addCourse(courseDTO);
         return R.success();
     }
 
@@ -118,15 +118,15 @@ public class TeacherController {
      */
     @RequestMapping("/getCoursesPageByTeaId")
     public R getCoursesPageByTeaId(@RequestParam(value = "currentPage", defaultValue = "1") Long currentPage, HttpSession session) {
-        TeacherVo teacherVo = (TeacherVo) session.getAttribute("teacherVo");
+        TeacherVO teacherVo = (TeacherVO) session.getAttribute("teacherVo");
         if (teacherVo == null) {
             return R.fail("你的登录会话已过期，请前往首页重新登录");
         }
-        TeacherTo teacherTo = new TeacherTo();
-        teacherTo.setCurrent(currentPage);
-        teacherTo.setSize(12);
-        BeanUtils.copyProperties(teacherVo, teacherTo);
-        return courseFeignService.getCoursesPageByTeaId(teacherTo);
+        TeacherDTO teacherDTO = new TeacherDTO();
+        teacherDTO.setCurrent(currentPage);
+        teacherDTO.setSize(12);
+        BeanUtils.copyProperties(teacherVo, teacherDTO);
+        return courseFeignService.getCoursesPageByTeaId(teacherDTO);
     }
 
     /**

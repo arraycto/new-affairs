@@ -1,7 +1,7 @@
 package com.affairs.course.mapper;
 
 import com.affairs.course.entity.Elective;
-import com.affaris.common.vo.ElectiveVo;
+import com.affaris.common.vo.ElectiveVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,5 +22,5 @@ public interface ElectiveMapper extends BaseMapper<Elective> {
      * @param stuId
      * @return
      */
-    IPage<ElectiveVo> getSelectedCourseFromDataBase(Page<ElectiveVo> page, Integer stuId);
+    IPage<ElectiveVO> getSelectedCourseFromDataBase(Page<ElectiveVO> page, Integer stuId);
 }
