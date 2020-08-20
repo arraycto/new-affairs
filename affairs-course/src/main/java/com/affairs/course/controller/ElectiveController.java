@@ -74,6 +74,7 @@ public class ElectiveController {
         String couId = "cou_id";
         QueryWrapper<Elective> electiveQueryWrapper = new QueryWrapper<>();
         electiveQueryWrapper.eq(stuId, abortCourseDTO.getStuId()).eq(couId, abortCourseDTO.getCouId());
+        // todo 退选课程后应更新课程表
         if (electiveService.remove(electiveQueryWrapper)) {
             return R.success();
         } else {

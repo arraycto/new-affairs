@@ -91,7 +91,8 @@ public class ElectiveServiceImpl extends ServiceImpl<ElectiveMapper, Elective> i
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-            e.printStackTrace();
+            // 最后抛出一个异常才能保证事务生效
+            throw new RuntimeException("An error occurred in saving the course selection information, and roll back...");
         }
 
     }

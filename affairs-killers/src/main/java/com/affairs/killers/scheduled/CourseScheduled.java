@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CourseScheduled {
     @Autowired
-    IKillersService killersService;
+    private IKillersService killersService;
 
     /**
      * 获取截止未来一天内可选的课程缓存到Redis中（定时任务）
