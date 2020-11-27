@@ -7,7 +7,7 @@
 
 在实现基本功能的基础上，对核心模块在高并发场景下做了一定的优化
 
-访问前端：[new-affairs-ui](https://gitee.com/Surliness/new-affairs-ui)
+访问前端：[new-affairs-ui](https://github.com/philosophic/new-affairs-ui.git)
 
 #### 软件架构
 使用当前主流的前后端分离模式进行开发
