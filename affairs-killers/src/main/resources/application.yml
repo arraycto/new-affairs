@@ -11,12 +11,12 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.226.1:8848
+        server-addr: 192.168.43.102:8848
 
   datasource:
     username: root
     password: password
-    url: jdbc:mysql://192.168.56.20:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.56.10:3306/new_affairs?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
@@ -78,10 +78,10 @@ spring:
         login-password: admin
 
   redis:
-    host: 192.168.56.20
+    host: 192.168.56.10
 
   rabbitmq:
-    host: 192.168.56.20
+    host: 192.168.56.10
     port: 5672
     virtual-host: /
 
